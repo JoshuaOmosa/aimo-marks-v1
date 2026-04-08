@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+*.safetensors
+*.bin
+*.pt
+
+# Model files (too large for GitHub)
+marks_v1_model/*.safetensors
+checkpoints/
+curated_data/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+venv/
