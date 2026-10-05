@@ -1,5 +1,5 @@
-{% if not add_generation_prompt is defined %}{% set add_generation_prompt = false %}{% endif %}{{ bos_token }}{% for message in messages %}{% if message['role'] == 'user' %}{{ 'User: ' + message['content'] + '
+{% if not add_generation_prompt is defined %}{% set add_generation_prompt = false %}{% endif %}{{ bos_token }}{% for message in messages %}{% if message['role'] == 'user' %}{{ 'Problem: ' + message['content'] + '
 
-' }}{% elif message['role'] == 'assistant' %}{{ 'Assistant: ' + message['content'] + eos_token }}{% elif message['role'] == 'system' %}{{ message['content'] + '
+' }}{% elif message['role'] == 'assistant' %}{{ 'Solution: ' + message['content'] + eos_token }}{% elif message['role'] == 'system' %}{{ message['content'] + '
 
-' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ 'Assistant:' }}{% endif %}
+' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ 'Solution: ' }}{% endif %}

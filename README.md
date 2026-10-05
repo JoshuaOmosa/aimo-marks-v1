@@ -462,8 +462,8 @@ flowchart TD
 | `train_aimo.py` | End-to-end training: load, LoRA, tokenize, train, test, save |
 | `demo_app.py` | Loads base + adapter, serves the Gradio UI |
 | `scripts/export_model.py` | Validates and zips the model folder |
-| `utils/memory_utils.py` | Deletes model/trainer objects, empties the CUDA cache |
-| `utils/system_cleaner.py` | Runs GC, terminates child processes, flushes OS buffers |
+| `utils/memory_utils.py` | `clear_gpu_memory(globals())` drops model/trainer references and empties the CUDA cache |
+| `utils/system_cleaner.py` | `clear_system_resources()` runs GC, stops leftover child processes, flushes OS buffers |
 
 ---
 
@@ -509,19 +509,17 @@ Things worth knowing before you rely on or extend this project:
 
 - **No published benchmarks.** The repository does not include evaluation results on GSM8K, MATH, AIMO, or any held-out set, so accuracy claims are unverified. The base model is already RL-tuned for math, and this adapter was trained on a small sample.
 - **Small training run.** One epoch over 500 examples is a proof-of-concept scale. The script itself labels it "just 1 epoch for testing".
-- **Dataset filtering is not implemented.** Earlier documentation mentions filtering to problems with 5-digit answers via a `curation_pipeline` module. That module is not in this repository, and `train_aimo.py` currently uses the first 500 unfiltered rows.
+- **No dataset filtering yet.** `train_aimo.py` uses the first 500 rows of NuminaMath-CoT as-is. Filtering by answer type or difficulty is planned.
 - **Loss covers the whole text.** Training uses standard causal LM loss over prompt and solution together (no prompt masking).
 - **Sampling is non-deterministic.** The demo samples at temperature 0.4, so the same problem can produce different answers. For math, greedy decoding (`do_sample=False`) or majority voting over several samples is often more reliable.
 - **Output cleanup is heuristic.** The camelCase-splitting regex in `format_reasoning` can also alter code or LaTeX tokens such as `\frac{a}{b}` patterns, and the "The answer is" truncation assumes that phrase appears once.
-- **Utility scripts run on import.** `memory_utils.py` and `system_cleaner.py` call their cleanup function at module level, so importing them triggers the cleanup immediately. Also, `memory_utils.py` checks its own `globals()`, so it cannot delete a model that lives in another script's namespace.
-- **`chat_template.jinja` is not used by the demo.** The template uses `User:` / `Assistant:` turns, while training and the demo use the `Problem:` / `Solution:` format. Keep to the latter when prompting.
-- **LR mismatch in older docs.** Earlier README text listed a learning rate of 2e-4; the code uses 1e-4, which is what this document reflects.
+- **Prompt format matters.** The adapter was trained on `Problem:` / `Solution:` text. The demo builds that string directly, and `chat_template.jinja` produces the same format if you use `tokenizer.apply_chat_template`.
 
 ---
 
 ## 12. License and Acknowledgments
 
-**License:** MIT. Note that a `LICENSE` file is not currently included in the repository, so add one before publishing.
+**License:** MIT. See [LICENSE](LICENSE).
 
 The base model and dataset carry their own licenses and terms; check the DeepSeek-Math and NuminaMath-CoT pages before commercial use.
 
